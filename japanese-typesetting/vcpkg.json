@@ -1,0 +1,16 @@
+{
+  "name": "japanese-typesetting",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "icu",
+    "freetype",
+    "harfbuzz",
+    "boost-locale",
+    "utf8cpp",
+    "podofo",
+    "libxml2",
+    "pugixml",
+    "qt5-base",
+    "gtest"
+  ]
+}

@@ -1,0 +1,7 @@
+# 統合テストのCMakeリスト
+
+# 文書処理の統合テスト
+add_japanese_typesetting_test(document_processing_test document_processing_test.cpp)
+
+# 組版エンジンの統合テスト
+add_japanese_typesetting_test(typesetting_engine_test typesetting_engine_test.cpp)
