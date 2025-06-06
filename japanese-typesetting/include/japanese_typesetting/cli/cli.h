@@ -80,7 +80,7 @@ public:
      * @param options コマンドラインオプション
      * @return 成功した場合は0、エラーの場合は非0
      */
-    int run(const CommandLineOptions& options);
+    int run(CommandLineOptions options);
 
 private:
     /**
