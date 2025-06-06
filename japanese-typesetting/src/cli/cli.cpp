@@ -192,7 +192,7 @@ void CommandLineInterface::showVersion() const {
     std::cout << "Copyright (C) 2025 Japanese Typesetting Project" << std::endl;
 }
 
-int CommandLineInterface::run(const CommandLineOptions& options) {
+int CommandLineInterface::run(CommandLineOptions options) {
     // ヘルプまたはバージョン情報の表示
     if (options.help) {
         showHelp();
