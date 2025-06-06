@@ -12,6 +12,7 @@
 #include <cctype>
 #include <ctime>
 #include <iomanip>
+#include <iostream>
 
 namespace japanese_typesetting {
 namespace output {
@@ -174,19 +175,22 @@ std::string HtmlOutputEngine::generateHtml(
     if (options.embedFonts && !options.fontPaths.empty()) {
         html << "  <style>\n";
         
+        auto ends_with = [](const std::string& s, const std::string& suf) {
+            return s.size() >= suf.size() && std::equal(suf.rbegin(), suf.rend(), s.rbegin());
+        };
         for (const auto& fontPath : options.fontPaths) {
             if (std::filesystem::exists(fontPath)) {
                 std::string fontName = std::filesystem::path(fontPath).stem().string();
                 std::string fontData = encodeFont(fontPath);
                 std::string fontFormat;
-                
-                if (fontPath.ends_with(".ttf")) {
+
+                if (ends_with(fontPath, ".ttf")) {
                     fontFormat = "truetype";
-                } else if (fontPath.ends_with(".otf")) {
+                } else if (ends_with(fontPath, ".otf")) {
                     fontFormat = "opentype";
-                } else if (fontPath.ends_with(".woff")) {
+                } else if (ends_with(fontPath, ".woff")) {
                     fontFormat = "woff";
-                } else if (fontPath.ends_with(".woff2")) {
+                } else if (ends_with(fontPath, ".woff2")) {
                     fontFormat = "woff2";
                 } else {
                     continue; // 未対応のフォント形式

@@ -25,8 +25,10 @@ target_link_libraries(japanese_typesetting_core
         ICU::uc
         ICU::i18n
         Freetype::Freetype
-        harfbuzz::harfbuzz
 )
+if(TARGET harfbuzz::harfbuzz)
+    target_link_libraries(japanese_typesetting_core PUBLIC harfbuzz::harfbuzz)
+endif()
 
 # CLIモジュールのソースファイル
 set(CLI_SOURCES
@@ -43,25 +45,38 @@ target_link_libraries(japanese_typesetting_cli
 )
 
 # GUIモジュールのソースファイル
-set(GUI_SOURCES
-    gui/gui.cpp
-)
-
-# GUIライブラリの作成
-add_library(japanese_typesetting_gui ${GUI_SOURCES})
-
-# GUIライブラリの依存関係
-target_link_libraries(japanese_typesetting_gui
-    PUBLIC
-        japanese_typesetting_core
-)
+find_package(Qt5 COMPONENTS Widgets QUIET)
+if(Qt5_FOUND)
+    set(GUI_SOURCES gui/gui.cpp)
+    add_library(japanese_typesetting_gui ${GUI_SOURCES})
+    target_link_libraries(japanese_typesetting_gui
+        PUBLIC
+            japanese_typesetting_core
+            Qt5::Widgets
+    )
+else()
+    message(WARNING "Qt5 not found; GUI module will not be built")
+endif()
 
 # 出力モジュールのソースファイル
 set(OUTPUT_SOURCES
-    output/pdf/pdf_output.cpp
-    output/epub/epub_output.cpp
     output/html/html_output.cpp
 )
+
+find_package(Python3 COMPONENTS Development QUIET)
+if(Python3_Development_FOUND)
+    list(APPEND OUTPUT_SOURCES output/pdf/pdf_output.cpp)
+else()
+    message(WARNING "Python3 development package not found; PDF output will be disabled")
+endif()
+
+include(CheckIncludeFileCXX)
+check_include_file_cxx(zip.h HAVE_ZIP_H)
+if(HAVE_ZIP_H)
+    list(APPEND OUTPUT_SOURCES output/epub/epub_output.cpp)
+else()
+    message(WARNING "libzip headers not found; EPUB output will be disabled")
+endif()
 
 # 出力ライブラリの作成
 add_library(japanese_typesetting_output ${OUTPUT_SOURCES})
@@ -72,19 +87,21 @@ target_link_libraries(japanese_typesetting_output
         japanese_typesetting_core
 )
 
+if(Python3_Development_FOUND)
+    target_include_directories(japanese_typesetting_output PUBLIC ${Python3_INCLUDE_DIRS})
+    target_link_libraries(japanese_typesetting_output PUBLIC ${Python3_LIBRARIES})
+endif()
+
 # プラグインモジュールのソースファイル
-set(PLUGIN_SOURCES
-    plugin/plugin_manager.cpp
-)
-
-# プラグインライブラリの作成
-add_library(japanese_typesetting_plugin ${PLUGIN_SOURCES})
-
-# プラグインライブラリの依存関係
-target_link_libraries(japanese_typesetting_plugin
-    PUBLIC
-        japanese_typesetting_core
-)
+include(CheckIncludeFileCXX)
+check_include_file_cxx(nlohmann/json.hpp HAVE_NLOHMANN_JSON)
+if(HAVE_NLOHMANN_JSON)
+    set(PLUGIN_SOURCES plugin/plugin_manager.cpp)
+    add_library(japanese_typesetting_plugin ${PLUGIN_SOURCES})
+    target_link_libraries(japanese_typesetting_plugin PUBLIC japanese_typesetting_core)
+else()
+    message(WARNING "nlohmann/json.hpp not found; plugin system will be disabled")
+endif()
 
 # メイン実行ファイルの作成
 add_executable(japanese_typesetting main.cpp)
@@ -94,7 +111,11 @@ target_link_libraries(japanese_typesetting
     PRIVATE
         japanese_typesetting_core
         japanese_typesetting_cli
-        japanese_typesetting_gui
         japanese_typesetting_output
-        japanese_typesetting_plugin
 )
+if(TARGET japanese_typesetting_gui)
+    target_link_libraries(japanese_typesetting PRIVATE japanese_typesetting_gui)
+endif()
+if(TARGET japanese_typesetting_plugin)
+    target_link_libraries(japanese_typesetting PRIVATE japanese_typesetting_plugin)
+endif()
