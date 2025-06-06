@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <stdexcept>
 #include <Python.h>
+#include <iostream>
 
 namespace japanese_typesetting {
 namespace output {
