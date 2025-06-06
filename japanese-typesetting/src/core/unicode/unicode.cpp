@@ -7,6 +7,7 @@
 #include <unicode/unistr.h>
 #include <unicode/normlzr.h>
 #include <unicode/uchar.h>
+#include <unicode/utf.h>
 #include <algorithm> // std::find用に追加
 
 namespace japanese_typesetting {
@@ -60,8 +61,10 @@ std::u32string UnicodeHandler::utf8ToUtf32(const std::string& utf8String) const 
     std::u32string result;
     result.reserve(ustr.length());
     
-    for (int32_t i = 0; i < ustr.length(); ++i) {
-        result.push_back(static_cast<char32_t>(ustr.char32At(i)));
+    for (int32_t i = 0; i < ustr.length(); ) {
+        UChar32 c = ustr.char32At(i);
+        result.push_back(static_cast<char32_t>(c));
+        i += U16_LENGTH(c);
     }
     
     return result;
