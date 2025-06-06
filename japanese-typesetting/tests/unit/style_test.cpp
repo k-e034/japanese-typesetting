@@ -1,6 +1,6 @@
 /**
  * @file style_test.cpp
- * @brief テスト用の空実装ファイル
+ * @brief Styleクラスの実際のテストを含むファイル
  */
 
 #include <gtest/gtest.h>
